@@ -34,6 +34,17 @@ def load_channel_mention(team_id, channel_id, from_time, to_time):
     return result['data']['mention']
 
 
+def load_team_mention(team_id, from_time, to_time):
+    # Get the statistics of mentions within a date range: /api/mention?team={TEAM_ID}&channel={CHANNEL_ID}&from={FROM_TIME}&to={TO_TIME}
+    result = load_json(path+ 'mention?team=' + str(team_id)  + '&from=' + str(from_time) + '&to=' +str(to_time))
+    return result['data']['mention']
+
+
+def load_team_count(team_id, from_time, to_time):
+    result = load_json(path+ 'message/count?team=' + str(team_id)  + '&from=' + str(from_time) + '&to=' +str(to_time))
+    return result['data']['message']
+
+
 def load_channel_count(team_id, channel_id, from_time, to_time):
     # Get count of messages by all participants.
     result = load_json(path+ 'message/count?team=' + str(team_id) + '&channel=' + str(channel_id) + '&from=' + str(from_time) + '&to=' +str(to_time))
@@ -99,6 +110,61 @@ app
 '''
 
 path = 'http://slack.imxieyi.com/api/'
+
+
+@app.route('/team_account_num/<team_id>')
+def output_account_num_team(team_id):
+    channels = load_channels(team_id)
+    count = 0
+    for channel in channels:
+        count += channel['num_members']
+    return str(count)
+
+
+@app.route('/channel_account_num/<team_id>/<channel_id>')
+def output_account_num_channel(team_id, channel_id):
+    channels = load_channels(team_id)
+    for channel in channels:
+        if channel['id'] == channel_id:
+            return str(channel['num_members'])
+        else:
+            return '0'
+
+
+@app.route('/team_message_num/<team_id>/<from_time>/<to_time>')
+def output_team_message_count(team_id, from_time, to_time):
+    counts = load_team_count(team_id, from_time, to_time)
+    total = 0
+    for count in counts:
+        total += count['count']
+    return str(total)
+
+
+@app.route('/channel_message_num/<team_id>/<channel_id>/<from_time>/<to_time>')
+def output_channel_message_count(team_id, channel_id, from_time, to_time):
+    counts = load_channel_count(team_id, channel_id, from_time, to_time)
+    total = 0
+    for count in counts:
+        total += count['count']
+    return str(total)
+
+
+@app.route('/team_mention_num/<team_id>/<from_time>/<to_time>')
+def output_team_mention_count(team_id, from_time, to_time):
+    counts = load_team_mention(team_id, from_time, to_time)
+    total = 0
+    for count in counts:
+        total += count['count']
+    return str(total)
+
+
+@app.route('/channel_mention_num/<team_id>/<channel_id>/<from_time>/<to_time>')
+def output_channel_mention_count(team_id, channel_id, from_time, to_time):
+    counts = load_channel_mention(team_id, channel_id, from_time, to_time)
+    total = 0
+    for count in counts:
+        total += count['count']
+    return str(total)
 
 
 @app.route('/sentiment/<team_id>/<channel_id>/<from_time>/<to_time>/<length>/<offset>')
