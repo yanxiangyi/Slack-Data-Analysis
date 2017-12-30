@@ -41,7 +41,8 @@ Return Type: **JSON**
       {"user": "U1CNBS8F9", "timestamp": 1512481249, "text": "Cool!"},
       {"user": "U83RD1CBE", "timestamp": 1512039064, "text": "cool! thanks!"}
     ]
-}```
+}
+```
 
 
 **Get channel message sentiment:**
