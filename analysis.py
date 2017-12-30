@@ -207,35 +207,29 @@ def output_force_directed(team_id, from_time, to_time):
 def output_frequency_channel(team_id, channel_id, from_time, to_time):
     results = load_json(path+ 'message/count?team=' + str(team_id) + '&channel=' + str(channel_id) + '&from=' + str(from_time) + '&to=' +str(to_time))
     total = 0
+    output = []
     for result in results['data']['message']:
         total += result['count']
-    output = 'User\tActiveDegree\n'
     for result in results['data']['message']:
-        output += result['user']
-        output += '\t'
-        output += str(result['count']/total)
-        output += '\n'
-    return output
+        output.append({'user': result['user'], 'count': result['count']/total})
+    return json.dumps(output)
 
 
 @app.route('/team-frequency/<team_id>/<from_time>/<to_time>')
 def output_frequency_team(team_id, from_time, to_time):
     results = load_json(path+ 'message/count?team=' + str(team_id)  + '&from=' + str(from_time) + '&to=' +str(to_time))
     total = 0
+    output = []
     for result in results['data']['message']:
         total += result['count']
-    output = 'User\tActiveDegree\n'
     for result in results['data']['message']:
-        output += result['user']
-        output += '\t'
-        output += str(result['count']/total)
-        output += '\n'
-    return output
+        output.append({'user': result['user'], 'count': result['count']/total})
+    return json.dumps(output)
 
 
 @app.route('/user-frequency/<team_id>/<channel_id>/<user_id>/<from_time>/<to_time>')
 def output_frequency_user(team_id, channel_id, user_id, from_time, to_time):
-    output = 'date\tclose\n'
+    output = []
     current_time = int(from_time)
     time_range = []
     while True:
@@ -258,11 +252,8 @@ def output_frequency_user(team_id, channel_id, user_id, from_time, to_time):
     # Remove the last timestamp
     time_range.pop()
     for i in range(len(time_range)):
-        output += str(time.strftime('%d-%b-%y', time.localtime(time_range[i])))
-        output += '\t'
-        output += str(frequencies[i])
-        output += '\n'
-    return output
+        output.append({'time': str(time.strftime('%d-%b-%y', time.localtime(time_range[i]))), 'count': frequencies[i]})
+    return json.dumps(output)
 
 
 @app.route('/channel-activity/<team_id>/<from_time>/<to_time>')
