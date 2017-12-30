@@ -4,7 +4,7 @@
 
 Return Type: **A number.**
 
-#### Member
+### Member
 
 **Get team member count:**
 `/team_account_num/<team_id>`
@@ -12,7 +12,7 @@ Return Type: **A number.**
 **Get channel member count:**
 `/channel_account_num/<team_id>/<channel_id>`
 
-#### Message
+### Message
 
 **Get team message count:**
 `/team_message_num/<team_id>/<from_time>/<to_time>`
@@ -20,7 +20,7 @@ Return Type: **A number.**
 **Get channel message count:**
 `/channel_message_num/<team_id>/<channel_id>/<from_time>/<to_time>`
 
-#### Mention
+### Mention
 
 **Get team mention count:**
 `/team_mention_num/<team_id>/<from_time>/<to_time>`
@@ -58,12 +58,12 @@ Count of messages are also returned even if `length` and `offset` are missing.
 
 Return Type: **JSON**
 
-#### Network visualization (Force-Directed Graph)
+### Network visualization (Force-Directed Graph)
 
 **Get team force_directed graph:**
 `/force_directed/<team_id>/<from_time>/<to_time>`
 
-#### Message Frequency Graph
+### Message Frequency Graph
 
 **Get message frequency in one channel:**
 `/channel-frequency/<team_id>/<channel_id>/<from_time>/<to_time>`
@@ -71,12 +71,12 @@ Return Type: **JSON**
 **Get message frequency in one team:**
 `/team-frequency/<team_id>/<from_time>/<to_time>`
 
-#### User Frequency Graph (Line Chart)
+### User Frequency Graph (Line Chart)
 
 **Get user chat frequency in one channel:**
 `/user-frequency/<team_id>/<channel_id>/<user_id>/<from_time>/<to_time>`
 
-#### Channel Activity (Bubble chart)
+### Channel Activity (Bubble chart)
 
 **Get channel activity in one team:**
 `/channel-activity/<team_id>/<from_time>/<to_time>`
