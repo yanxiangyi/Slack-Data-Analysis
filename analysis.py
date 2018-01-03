@@ -413,8 +413,11 @@ def output_intimate(team_id, channel_id, from_time, to_time, user1, user2):
             total_count2 += mention['count']
             if mention['to_user'] == user1:
                 count2 += mention['count']
-    intimate = (count1 + count2) / (total_count1 + total_count2)
-    intimate = format(intimate, '.2f')
+    if count1 + count2 == 0:
+        intimate = 0
+    else:
+        intimate = (count1 + count2) / (total_count1 + total_count2)
+        intimate = format(intimate, '.2f')
     result = {'intimate': intimate}
     return json.dumps(result)
 
