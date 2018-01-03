@@ -169,7 +169,7 @@ def output_channel_mention_count(team_id, channel_id, from_time, to_time):
 def analyze_history_all(team_id, channel_id, from_time, to_time, length, offset):
     histories = show_channel_history(team_id, channel_id, from_time, to_time, length, offset)
     all_history = ''
-    for history in histories:
+    for history in histories['message']:
         all_history += str(history) + ' '
 
     sentiment = text_sentiment_json(all_history)
@@ -206,10 +206,12 @@ def output_frequency_channel(team_id, channel_id, from_time, to_time):
     results = load_json(path+ 'message/count?team=' + str(team_id) + '&channel=' + str(channel_id) + '&from=' + str(from_time) + '&to=' +str(to_time))
     total = 0
     output = []
+    user_num = 0
     for result in results['data']:
         total += result['count']
+        user_num += 1
     for result in results['data']:
-        output.append({'user': result['user'], 'count': result['count']/total})
+        output.append({'user': result['user'], 'count': result['count']/total*user_num})
     return json.dumps(output)
 
 
@@ -218,10 +220,12 @@ def output_frequency_team(team_id, from_time, to_time):
     results = load_json(path+ 'message/count?team=' + str(team_id)  + '&from=' + str(from_time) + '&to=' +str(to_time))
     total = 0
     output = []
+    user_num = 0
     for result in results['data']:
         total += result['count']
+        user_num += 1
     for result in results['data']:
-        output.append({'user': result['user'], 'count': result['count']/total})
+        output.append({'user': result['user'], 'count': result['count']/total*user_num})
     return json.dumps(output)
 
 
