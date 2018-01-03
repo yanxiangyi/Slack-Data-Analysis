@@ -9,6 +9,8 @@ from QcloudApi.qcloudapi import QcloudApi
 import ast
 from collections import Counter
 import re
+from nltk import word_tokenize
+from nltk.corpus import stopwords
 app = Flask(__name__)
 
 '''
@@ -55,6 +57,17 @@ def cluster(G):
     # http://cjauvin.blogspot.com/2014/03/k-means-vs-louvain.html
     partition = community_louvain.best_partition(G)
     return partition
+
+
+def show_team_history(team_id, from_time, to_time, length, offset):
+    channels = load_channels(team_id)
+    results = []
+    for channel in channels:
+        channel_id = channel['id']
+        response = urllib.request.urlopen(path+ 'message?team=' + str(team_id) + '&channel=' + str(channel_id) + '&from=' + str(from_time) + '&to=' +str(to_time) + '&length=' + str(length) + '&offset=' + str(offset))
+        result = json.loads(response.read().decode('utf-8'))
+        results += result['data']['message']
+    return results
 
 
 def show_channel_history(team_id, channel_id, from_time, to_time, length, offset):
@@ -104,10 +117,18 @@ def add_one_day(from_time):
     next_time = int(time.mktime(new.timetuple()))
     return next_time
 
-def find_all_word(team_id, channel_id, from_time, to_time, length, offset):
+def channel_all_word(team_id, channel_id, from_time, to_time, length, offset):
     histories = show_channel_history(team_id, channel_id, from_time, to_time, length, offset)
     all_history = ''
     for history in histories['message']:
+        all_history += str(history['text']) + ' '
+    return all_history
+
+
+def team_all_word(team_id, from_time, to_time, length, offset):
+    histories = show_team_history(team_id, from_time, to_time, length, offset)
+    all_history = ''
+    for history in histories:
         all_history += str(history['text']) + ' '
     return all_history
 
@@ -283,21 +304,47 @@ def output_channel_activity(team_id, from_time, to_time):
         results.append(result)
     return json.dumps(results)
 
-@app.route('/channel-word-frequency/<team_id>/<channel_id>')
-def find_most_frequent_word(team_id, channel_id):
+
+@app.route('/team-word-frequency/<team_id>')
+def team_most_frequent_word(team_id):
     from_time = '946684800'
     to_time = '1514937600'
-    length = 500
+    length = 100
     offset = 0
-    all_history = find_all_word(team_id, channel_id, from_time, to_time, length, offset)
+    all_history = team_all_word(team_id, from_time, to_time, length, offset)
     words = re.findall(r'\w+', all_history)
     cap_words = [word.upper() for word in words]
     word_counts = Counter(cap_words)
     word_counts = dict(word_counts)
-    common_words = ['all', 'just', 'being', 'over', 'both', 'through', 'yourselves', 'its', 'before', 'herself', 'had', 'should', 'to', 'only', 'under', 'ours', 'has', 'do', 'them', 'his', 'very', 'they', 'not', 'during', 'now', 'him', 'nor', 'did', 'this', 'she', 'each', 'further', 'where', 'few', 'because', 'doing', 'some', 'are', 'our', 'ourselves', 'out', 'what', 'for', 'while', 'does', 'above', 'between', 't', 'be', 'we', 'who', 'were', 'here', 'hers', 'by', 'on', 'about', 'of', 'against', 's', 'or', 'own', 'into', 'yourself', 'down', 'your', 'from', 'her', 'their', 'there', 'been', 'whom', 'too', 'themselves', 'was', 'until', 'more', 'himself', 'that', 'but', 'don', 'with', 'than', 'those', 'he', 'me', 'myself', 'these', 'up', 'will', 'below', 'can', 'theirs', 'my', 'and', 'then', 'is', 'am', 'it', 'an', 'as', 'itself', 'at', 'have', 'in', 'any', 'if', 'again', 'no', 'when', 'same', 'how', 'other', 'which', 'you', 'after', 'most', 'such', 'why', 'a', 'off', 'i', 'yours', 'so', 'the', 'having', 'once']
+    common_words = set(stopwords.words('english'))
+    common_words = [common_word.upper() for common_word in common_words]
+    defaultWords = []
+    largest = 0
+    for word, frequency in word_counts.items():
+        if frequency > largest:
+            largest = frequency
+        if frequency > largest/10:
+            if word not in common_words and not word.isdigit():
+                defaultWords.append({"name": word, "value": frequency})
+    return json.dumps(defaultWords)
+
+
+@app.route('/channel-word-frequency/<team_id>/<channel_id>')
+def channel_most_frequent_word(team_id, channel_id):
+    from_time = '946684800'
+    to_time = '1514937600'
+    length = 500
+    offset = 0
+    all_history = channel_all_word(team_id, channel_id, from_time, to_time, length, offset)
+    words = re.findall(r'\w+', all_history)
+    cap_words = [word.upper() for word in words]
+    word_counts = Counter(cap_words)
+    word_counts = dict(word_counts)
+    common_words = set(stopwords.words('english'))
     common_words = [common_word.upper() for common_word in common_words]
     defaultWords = []
     for word, frequency in word_counts.items():
         if word not in common_words and not word.isdigit():
             defaultWords.append({"name": word, "value": frequency})
     return json.dumps(defaultWords)
+
