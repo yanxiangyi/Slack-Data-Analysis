@@ -245,8 +245,8 @@ def output_frequency_channel(team_id, channel_id, from_time, to_time):
     return json.dumps(output)
 
 
-@app.route('/team-frequency/<team_id>/<from_time>/<to_time>')
-def output_frequency_team(team_id, from_time, to_time):
+@app.route('/team-frequency/<team_id>/<from_time>/<to_time>/<select_user_num>')
+def output_frequency_team(team_id, from_time, to_time, select_user_num):
     results = load_json(path+ 'message/count?team=' + str(team_id)  + '&from=' + str(from_time) + '&to=' +str(to_time))
     total = 0
     output = []
@@ -256,6 +256,7 @@ def output_frequency_team(team_id, from_time, to_time):
         user_num += 1
     for result in results['data']:
         output.append({'user': result['user'], 'count': result['count']/total*user_num})
+    output = sorted(output, key=lambda k: k['count'], reverse=True)[:int(select_user_num)]
     return json.dumps(output)
 
 
@@ -323,9 +324,10 @@ def team_most_frequent_word(team_id):
     for word, frequency in word_counts.items():
         if frequency > largest:
             largest = frequency
-        if frequency > largest/10:
+        if frequency > largest/40:
             if word not in common_words and not word.isdigit():
                 defaultWords.append({"name": word, "value": frequency})
+    defaultWords = sorted(defaultWords, key=lambda k: k['value'], reverse=True)[:30]
     return json.dumps(defaultWords)
 
 
@@ -348,3 +350,88 @@ def channel_most_frequent_word(team_id, channel_id):
             defaultWords.append({"name": word, "value": frequency})
     return json.dumps(defaultWords)
 
+
+@app.route('/sentiment-user/<team_id>/<channel_id>/<from_time>/<to_time>/<user_id>')
+def analyze_history_user(team_id, channel_id, from_time, to_time, user_id):
+    if channel_id == 'undefined':
+        channel_id = ''
+    results = load_json(path + 'user/message?team=' + str(team_id) + '&channel' + str(channel_id) + '&from=' + str(
+        from_time) + '&to=' + str(to_time) + '&user=' + str(user_id))
+    results = results['data']
+    history = ''
+    for result in results:
+        history += result['text']
+        history += ' '
+    history = history[:5000]
+    try:
+        sentiment = text_sentiment_json(history)
+        positive = format(sentiment['positive'], '.2f')
+        negative = format(sentiment['negative'], '.2f')
+        result = json.dumps({'sentiment': {"positive": positive, "negative": negative}})
+    except:
+        result = json.dumps({'sentiment': {"positive": 2, "negative": 0}})
+
+    return result
+
+
+@app.route('/sentiment-two-user/<team_id>/<channel_id>/<from_time>/<to_time>/<user1>/<user2>')
+def analyze_history_two_user(team_id, channel_id, from_time, to_time, user1, user2):
+    if channel_id == 'undefined':
+        channel_id = ''
+    results = load_json(path + 'mention/message?team=' + str(team_id) + '&channel' + str(channel_id) + '&from=' + str(
+        from_time) + '&to=' + str(to_time) + '&user1=' + str(user1) + '&user2=' + str(user2))
+    results = results['data']
+    history = ''
+    for result in results:
+        history += result['text']
+        history += ' '
+    history = history[:5000]
+    try:
+        sentiment = text_sentiment_json(history)
+        positive = format(sentiment['positive'], '.2f')
+        negative = format(sentiment['negative'], '.2f')
+        result = json.dumps({'sentiment': {"positive": positive, "negative": negative}})
+    except:
+        result = json.dumps({'sentiment': {"positive": 2, "negative": 0}})
+
+    return result
+
+
+@app.route('/intimate/<team_id>/<channel_id>/<from_time>/<to_time>/<user1>/<user2>')
+def output_intimate(team_id, channel_id, from_time, to_time, user1, user2):
+    mentions = load_channel_mention(team_id, channel_id, from_time, to_time)
+    total_count1 = 0
+    total_count2 = 0
+    count1 = 0
+    count2 = 0
+    for mention in mentions:
+        if mention['from_user'] == user1:
+            total_count1 += mention['count']
+            if mention['to_user'] == user2:
+                count1 += mention['count']
+        if mention['from_user'] == user2:
+            total_count2 += mention['count']
+            if mention['to_user'] == user1:
+                count2 += mention['count']
+    intimate = (count1 + count2) / (total_count1 + total_count2)
+    intimate = format(intimate, '.2f')
+    result = {'intimate': intimate}
+    return json.dumps(result)
+
+
+@app.route('/activity-degree/<team_id>/<channel_id>/<from_time>/<to_time>/<user_id>')
+def output_activity_degree_user(team_id, channel_id, from_time, to_time, user_id):
+    if channel_id == 'undefined':
+        results = load_json(path+ 'message/count?team=' + str(team_id) + '&from=' + str(from_time) + '&to=' +str(to_time))
+    else:
+        results = load_json(path+ 'message/count?team=' + str(team_id) + '&channel=' + str(channel_id) + '&from=' + str(from_time) + '&to=' +str(to_time))
+    total = 0
+    user_num = 0
+    for result in results['data']:
+        total += result['count']
+        user_num += 1
+    for result in results['data']:
+        if result['user'] == user_id:
+            count = result['count']/total*user_num
+            count = format(count, '.2f')
+            return json.dumps({'user': result['user'], 'count': count})
