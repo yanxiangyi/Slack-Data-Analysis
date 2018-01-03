@@ -1,9 +1,7 @@
 from flask import Flask
 from six.moves import urllib
 import json
-from pprint import pprint
 import networkx as nx
-import ssl
 from community import community_louvain
 import time
 import datetime
@@ -25,30 +23,30 @@ def load_json(url):
 
 # Get all available channels of a team: /api/channel?team={TEAM_ID}
 def load_channels(team_id):
-    return load_json(path+'channel?team=' + team_id)['data']['channel']
+    return load_json(path+'channel?team=' + team_id)['data']
 
 
 def load_channel_mention(team_id, channel_id, from_time, to_time):
     # Get the statistics of mentions within a date range: /api/mention?team={TEAM_ID}&channel={CHANNEL_ID}&from={FROM_TIME}&to={TO_TIME}
     result = load_json(path+ 'mention?team=' + str(team_id) + '&channel=' + str(channel_id) + '&from=' + str(from_time) + '&to=' +str(to_time))
-    return result['data']['mention']
+    return result['data']
 
 
 def load_team_mention(team_id, from_time, to_time):
     # Get the statistics of mentions within a date range: /api/mention?team={TEAM_ID}&channel={CHANNEL_ID}&from={FROM_TIME}&to={TO_TIME}
     result = load_json(path+ 'mention?team=' + str(team_id)  + '&from=' + str(from_time) + '&to=' +str(to_time))
-    return result['data']['mention']
+    return result['data']
 
 
 def load_team_count(team_id, from_time, to_time):
     result = load_json(path+ 'message/count?team=' + str(team_id)  + '&from=' + str(from_time) + '&to=' +str(to_time))
-    return result['data']['message']
+    return result['data']
 
 
 def load_channel_count(team_id, channel_id, from_time, to_time):
     # Get count of messages by all participants.
     result = load_json(path+ 'message/count?team=' + str(team_id) + '&channel=' + str(channel_id) + '&from=' + str(from_time) + '&to=' +str(to_time))
-    return result['data']['message']
+    return result['data']
 
 
 def cluster(G):
@@ -60,7 +58,7 @@ def cluster(G):
 def show_channel_history(team_id, channel_id, from_time, to_time, length, offset):
     response = urllib.request.urlopen(path+ 'message?team=' + str(team_id) + '&channel=' + str(channel_id) + '&from=' + str(from_time) + '&to=' +str(to_time) + '&length=' + str(length) + '&offset=' + str(offset))
     result = json.loads(response.read().decode('utf-8'))
-    return result['data']['message']
+    return result['data']
 
 
 def text_sentiment_json(input):
@@ -172,7 +170,7 @@ def analyze_history_all(team_id, channel_id, from_time, to_time, length, offset)
     histories = show_channel_history(team_id, channel_id, from_time, to_time, length, offset)
     all_history = ''
     for history in histories:
-        all_history += str(history['text']) + ' '
+        all_history += str(history) + ' '
 
     sentiment = text_sentiment_json(all_history)
     positive = sentiment['positive']
@@ -184,7 +182,7 @@ def analyze_history_all(team_id, channel_id, from_time, to_time, length, offset)
 @app.route('/force_directed/<team_id>/<from_time>/<to_time>')
 def output_force_directed(team_id, from_time, to_time):
     result = load_json(path + 'channel?team=' + team_id)
-    channels = result['data']['channel']
+    channels = result['data']
     G = nx.Graph()
     G = nx.Graph(G)
     for channel in channels:
@@ -208,9 +206,9 @@ def output_frequency_channel(team_id, channel_id, from_time, to_time):
     results = load_json(path+ 'message/count?team=' + str(team_id) + '&channel=' + str(channel_id) + '&from=' + str(from_time) + '&to=' +str(to_time))
     total = 0
     output = []
-    for result in results['data']['message']:
+    for result in results['data']:
         total += result['count']
-    for result in results['data']['message']:
+    for result in results['data']:
         output.append({'user': result['user'], 'count': result['count']/total})
     return json.dumps(output)
 
@@ -220,9 +218,9 @@ def output_frequency_team(team_id, from_time, to_time):
     results = load_json(path+ 'message/count?team=' + str(team_id)  + '&from=' + str(from_time) + '&to=' +str(to_time))
     total = 0
     output = []
-    for result in results['data']['message']:
+    for result in results['data']:
         total += result['count']
-    for result in results['data']['message']:
+    for result in results['data']:
         output.append({'user': result['user'], 'count': result['count']/total})
     return json.dumps(output)
 
@@ -271,4 +269,3 @@ def output_channel_activity(team_id, from_time, to_time):
         result = {'text': channel_names[i], 'count': channel_count}
         results.append(result)
     return json.dumps(results)
-
