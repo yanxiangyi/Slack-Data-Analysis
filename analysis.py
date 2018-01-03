@@ -7,6 +7,8 @@ import time
 import datetime
 from QcloudApi.qcloudapi import QcloudApi
 import ast
+from collections import Counter
+import re
 app = Flask(__name__)
 
 '''
@@ -101,6 +103,13 @@ def add_one_day(from_time):
     new = orig + datetime.timedelta(days=1)
     next_time = int(time.mktime(new.timetuple()))
     return next_time
+
+def find_all_word(team_id, channel_id, from_time, to_time, length, offset):
+    histories = show_channel_history(team_id, channel_id, from_time, to_time, length, offset)
+    all_history = ''
+    for history in histories['message']:
+        all_history += str(history['text']) + ' '
+    return all_history
 
 
 '''
@@ -273,3 +282,22 @@ def output_channel_activity(team_id, from_time, to_time):
         result = {'text': channel_names[i], 'count': channel_count}
         results.append(result)
     return json.dumps(results)
+
+@app.route('/channel-word-frequency/<team_id>/<channel_id>')
+def find_most_frequent_word(team_id, channel_id):
+    from_time = '946684800'
+    to_time = '1514937600'
+    length = 500
+    offset = 0
+    all_history = find_all_word(team_id, channel_id, from_time, to_time, length, offset)
+    words = re.findall(r'\w+', all_history)
+    cap_words = [word.upper() for word in words]
+    word_counts = Counter(cap_words)
+    word_counts = dict(word_counts)
+    common_words = ['all', 'just', 'being', 'over', 'both', 'through', 'yourselves', 'its', 'before', 'herself', 'had', 'should', 'to', 'only', 'under', 'ours', 'has', 'do', 'them', 'his', 'very', 'they', 'not', 'during', 'now', 'him', 'nor', 'did', 'this', 'she', 'each', 'further', 'where', 'few', 'because', 'doing', 'some', 'are', 'our', 'ourselves', 'out', 'what', 'for', 'while', 'does', 'above', 'between', 't', 'be', 'we', 'who', 'were', 'here', 'hers', 'by', 'on', 'about', 'of', 'against', 's', 'or', 'own', 'into', 'yourself', 'down', 'your', 'from', 'her', 'their', 'there', 'been', 'whom', 'too', 'themselves', 'was', 'until', 'more', 'himself', 'that', 'but', 'don', 'with', 'than', 'those', 'he', 'me', 'myself', 'these', 'up', 'will', 'below', 'can', 'theirs', 'my', 'and', 'then', 'is', 'am', 'it', 'an', 'as', 'itself', 'at', 'have', 'in', 'any', 'if', 'again', 'no', 'when', 'same', 'how', 'other', 'which', 'you', 'after', 'most', 'such', 'why', 'a', 'off', 'i', 'yours', 'so', 'the', 'having', 'once']
+    common_words = [common_word.upper() for common_word in common_words]
+    defaultWords = []
+    for word, frequency in word_counts.items():
+        if word not in common_words and not word.isdigit():
+            defaultWords.append({"name": word, "value": frequency})
+    return json.dumps(defaultWords)
