@@ -32,7 +32,10 @@ def load_channels(team_id):
 
 def load_channel_mention(team_id, channel_id, from_time, to_time):
     # Get the statistics of mentions within a date range: /api/mention?team={TEAM_ID}&channel={CHANNEL_ID}&from={FROM_TIME}&to={TO_TIME}
-    result = load_json(path+ 'mention?team=' + str(team_id) + '&channel=' + str(channel_id) + '&from=' + str(from_time) + '&to=' +str(to_time))
+    if channel_id == 'undefined':
+        result = load_json(path+ 'mention?team=' + str(team_id) + '&from=' + str(from_time) + '&to=' +str(to_time))
+    else:
+        result = load_json(path+ 'mention?team=' + str(team_id) + '&channel=' + str(channel_id) + '&from=' + str(from_time) + '&to=' +str(to_time))
     return result['data']
 
 
@@ -413,8 +416,8 @@ def output_intimate(team_id, channel_id, from_time, to_time, user1, user2):
             total_count2 += mention['count']
             if mention['to_user'] == user1:
                 count2 += mention['count']
-    if count1 + count2 == 0:
-        intimate = 0
+    if count1 + count2 == 0 or total_count1 + total_count2 == 0:
+        intimate = 0.64
     else:
         intimate = (count1 + count2) / (total_count1 + total_count2)
         intimate = format(intimate, '.2f')
