@@ -11,14 +11,14 @@ Return Type: **A number.**
 
 Example:
 
-http://10.21.55.77:5000/team_account_num/T09NY5SBT
+/team_account_num/T09NY5SBT
 
 **Get channel member count:**
 `/channel_account_num/<team_id>/<channel_id>`
 
 Example:
 
-http://10.21.55.77:5000/channel_account_num/T09NY5SBT/C09NXKJKA
+/channel_account_num/T09NY5SBT/C09NXKJKA
 
 ### Message
 
@@ -27,14 +27,14 @@ http://10.21.55.77:5000/channel_account_num/T09NY5SBT/C09NXKJKA
 
 Example:
 
-http://10.21.55.77:5000/team_message_num/T09NY5SBT/1483228800/1514160000
+/team_message_num/T09NY5SBT/1483228800/1514160000
 
 **Get channel message count:**
 `/channel_message_num/<team_id>/<channel_id>/<from_time>/<to_time>`
 
 Example:
 
-http://10.21.55.77:5000/channel_message_num/T09NY5SBT/C09NXKJKA/1483228800/1514160000
+/channel_message_num/T09NY5SBT/C09NXKJKA/1483228800/1514160000
 
 ### Mention
 
@@ -43,14 +43,14 @@ http://10.21.55.77:5000/channel_message_num/T09NY5SBT/C09NXKJKA/1483228800/15141
 
 Example:
 
-http://10.21.55.77:5000/team_mention_num/T09NY5SBT/1483228800/1514160000
+/team_mention_num/T09NY5SBT/1483228800/1514160000
 
 **Get channel mention count:**
 `/channel_mention_num/<team_id>/<channel_id>/<from_time>/<to_time>`
 
 Example:
 
-http://10.21.55.77:5000/channel_mention_num/T09NY5SBT/C09NXKJKA/1483228800/1514160000
+/channel_mention_num/T09NY5SBT/C09NXKJKA/1483228800/1514160000
 
 ## Text Sentiment
 
@@ -74,7 +74,7 @@ Return Type: **JSON**
 
 Example:
 
-http://10.21.55.77:5000/sentiment/T09NY5SBT/C09NXKJKA/1483228800/1514160000/10/0
+/sentiment/T09NY5SBT/C09NXKJKA/1483228800/1514160000/10/0
 
 `length` and `offset` are used to limit output.
 The default value of `offset` is 0.
@@ -93,7 +93,7 @@ Return Type: **JSON**
 
 Example:
 
-http://10.21.55.77:5000/force_directed/T09NY5SBT/1483228800/1514160000
+/force_directed/T09NY5SBT/1483228800/1514160000
 
 ### Message Frequency Graph
 
@@ -102,14 +102,14 @@ http://10.21.55.77:5000/force_directed/T09NY5SBT/1483228800/1514160000
 
 Example:
 
-http://10.21.55.77:5000/channel-frequency/T09NY5SBT/C09NXKJKA/1483228800/1514160000
+/channel-frequency/T09NY5SBT/C09NXKJKA/1483228800/1514160000
 
 **Get message frequency in one team:**
 `/team-frequency/<team_id>/<from_time>/<to_time>`
 
 Example:
 
-http://10.21.55.77:5000/team-frequency/T09NY5SBT/1483228800/1514160000
+/team-frequency/T09NY5SBT/1483228800/1514160000
 
 ### User Frequency Graph (Line Chart)
 
@@ -124,6 +124,6 @@ http://10.21.55.77:5000/team-frequency/T09NY5SBT/1483228800/1514160000
 
 Example:
 
-http://10.21.55.77:5000/channel-activity/T09NY5SBT/1483228800/1514160000
+/channel-activity/T09NY5SBT/1483228800/1514160000
 
 Note that times are in Unix epoch format with unit `second`.

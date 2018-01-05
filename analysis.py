@@ -84,8 +84,8 @@ def text_sentiment_json(input):
     action = 'TextSentiment'
     config = {
         'Region': 'sz',
-        'secretId': 'AKIDvhHhu7CD9vVt45JYr4A92nRt8AzdtIXh',
-        'secretKey': 'KURFrIahcDfx7NTQsMhqmDUecOxVUO6e',
+        'secretId': '',
+        'secretKey': '',
         'method': 'GET',
         'SignatureMethod': 'HmacSHA1'
     }
@@ -96,9 +96,9 @@ def text_sentiment_json(input):
 
     try:
         service = QcloudApi(module, config)
-        secretId = 'AKIDvhHhu7CD9vVt45JYr4A92nRt8AzdtIXh'
+        secretId = ''
         service.setSecretId(secretId)
-        secretKey = 'KURFrIahcDfx7NTQsMhqmDUecOxVUO6e'
+        secretKey = ''
         service.setSecretKey(secretKey)
         region = 'gz'
         service.setRegion(region)
